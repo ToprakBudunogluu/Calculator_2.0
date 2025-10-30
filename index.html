@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-M8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sadece Yavaş Hesap Makinesi</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            margin: 0;
+            overflow: hidden;
+        }
+        #calculator {
+            width: 300px;
+            background-color: #f9f9f9;
+            border: 1px solid #ccc;
+            padding: 15px;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        #display {
+            width: calc(100% - 12px);
+            background-color: #fff;
+            border: 1px solid #999;
+            color: #000;
+            font-size: 2em;
+            text-align: right;
+            padding: 5px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+        }
+        #keys {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+        #keys button {
+            width: 100%;
+            height: 55px;
+            background-color: #e0e0e0;
+            color: #000;
+            border: 1px solid #999;
+            font-size: 1.5em;
+            cursor: pointer;
+            transition: background-color 0.1s ease;
+        }
+        #keys button:hover {
+            background-color: #d0d0d0;
+        }
+        #keys button:active {
+            background-color: #c0c0c0;
+            transform: translate(1px, 1px);
+        }
+        #keys button.equals {
+            grid-column: span 4;
+        }
+
+        #image-container {
+            width: 400px;
+            height: 0; /* Başlangıçta gizli */
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* Animasyon için 'transition' ekleyebiliriz ama aniden açılması daha komik */
+        }
+
+        #joke-image {
+            width: 100%;
+            height: auto;
+            display: block;
+            opacity: 0; /* Başlangıçta şeffaf */
+        }
+
+        /* "loader" (yükleyici) stili kaldırıldı */
+
+    </style>
+</head>
+<body>
+
+    <div id="calculator">
+        <input type="text" id="display" readonly value="">
+        <div id="keys">
+            
+            <button class="clear" data-action="clear">C</button>
+            <button class="operator" data-action="operator">/</button>
+            <button class="operator" data-action="operator">*</button>
+            <button class="operator" data-action="operator">-</button>
+            
+            <button data-action="number">7</button>
+            <button data-action="number">8</button>
+            <button data-action="number">9</button>
+            <button class="operator" data-action="operator" style="grid-row: span 2;">+</button>
+
+            <button data-action="number">4</button>
+            <button data-action="number">5</button>
+            <button data-action="number">6</button>
+            
+            <button data-action="number">1</button>
+            <button data-action="number">2</button>
+            <button data-action="number">3</button>
+            <button class="equals" data-action="calculate" style="grid-row: span 2;">=</button>
+
+            <button data-action="number" style="grid-column: span 2;">0</button>
+            <button data-action="number">.</button>
+
+        </div>
+    </div>
+
+    <div id="image-container">
+        <img id="joke-image" alt="Beklenmedik Sonuç!">
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- BURAYI DÜZENLE (Kendi .bmp dosyan dahil) ---
+            const myJokeImages = [
+                'images/siteeee.png',
+
+                'images/sitee2.png',
+
+                'images/sitee3.png',
+
+                'images/sitee4.png'
+            ];
+            // -----------------------
+
+            const display = document.getElementById('display');
+            const keys = document.getElementById('keys');
+            // 'loader' değişkeni kaldırıldı
+            const jokeImage = document.getElementById('joke-image');
+            const imageContainer = document.getElementById('image-container');
+
+            let currentDisplayValue = '';
+            // 'interval' değişkeni kaldırıldı
+
+            keys.addEventListener('click', e => {
+                if (e.target.matches('button')) {
+                    const key = e.target;
+                    const action = key.dataset.action;
+                    const keyContent = key.textContent;
+
+                    // Tuşa basınca görseli gizle
+                    imageContainer.style.height = '0';
+                    jokeImage.src = '';
+                    jokeImage.style.opacity = '0';
+
+                    if (action === 'number' || action === 'operator') {
+                        currentDisplayValue += keyContent;
+                    } else if (action === 'clear') {
+                        currentDisplayValue = '';
+                    }
+
+                    display.value = currentDisplayValue;
+
+                    if (action === 'calculate') {
+                        if (currentDisplayValue === '') return;
+
+                        display.value = '';
+                        currentDisplayValue = '';
+
+                        // "loader.style.display = 'block';" kaldırıldı.
+
+                        const randomIndex = Math.floor(Math.random() * myJokeImages.length);
+                        const randomImageSrc = myJokeImages[randomIndex];
+                        
+                        // Gizli indirme başlıyor.
+                        // Kullanıcı bu aşamada bekleyecek.
+                        const tempImg = new Image();
+                        tempImg.src = randomImageSrc;
+
+                        // İndirme bittiğinde...
+                        tempImg.onload = () => {
+                            // Gerekli yüksekliği hesapla
+                            const originalHeight = tempImg.naturalHeight;
+                            const originalWidth = tempImg.naturalWidth;
+                            const containerWidth = imageContainer.offsetWidth;
+                            const finalImageHeight = (originalHeight / originalWidth) * containerWidth;
+
+                            // Resmi ata ve görünür yap
+                            jokeImage.src = randomImageSrc;
+                            jokeImage.style.opacity = '1';
+
+                            // --- Animasyon Kaldırıldı ---
+                            // Konteynerin yüksekliğini ANINDA ayarla
+                            imageContainer.style.height = `${finalImageHeight}px`;
+
+                            // "loader.style.display = 'none';" kaldırıldı.
+                        };
+                    }
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
